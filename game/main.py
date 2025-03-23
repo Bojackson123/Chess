@@ -56,9 +56,13 @@ def mainMenu():
 
 def play():
     game_board = Board()
-    #print(game_board.tiles)
-    pieces = Pieces("white")
+    # print(game_board.tiles)
+    pieces = Pieces("black")
     print(pieces.board)
+    # print(pieces.white_threat_map)
+    # print(pieces.black_threat_map)
+    test_moves = pieces.rook_possible_moves("white", (3,3))
+    print(test_moves)
     
     while True:
         game_board.draw(screen)
@@ -68,7 +72,15 @@ def play():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.QUIT()
-        
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if event.button == 1 and pieces.has_piece(mouse_pos):
+                    game_board.add_remove_highlight("left", mouse_pos)
+                if event.button == 3:
+                    game_board.add_remove_highlight("right", mouse_pos)
+                    
+                    
         pygame.display.flip()
         
         clock.tick(FPS)
