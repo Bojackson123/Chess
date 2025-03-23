@@ -43,6 +43,8 @@ class Pieces:
         self.white_images =  WHITE_IMAGES
         self.black_images = BLACK_IMAGES
         self.color = color
+        self.turn = self.color
+        self.selected_piece = None
         self.white_threat_map = [[0, 0, 0, 3, 0, 0, 0, 0],  # threat map for whites king
                                  [0, 0, 0, 0, 0, 0, 0, 0],
                                  [0, 0, 0, 0, 0, 0, 0, 0],
@@ -60,8 +62,7 @@ class Pieces:
                                  [0, 0, 0, 0, 0, 0, 0, 0],
                                  [0, 0, 0, 0, 0, 0, 0, 0],
                                  [0, 0, 0, 3, 0, 0, 0, 0]]
-        self.white_possible_moves = []
-        self.black_possible_moves = []
+        
         self.black_pawn_moved = [0, 0, 0, 0, 0, 0, 0, 0] # boolean array for black pawns first moves
         self.white_pawn_moved = [0, 0, 0, 0, 0, 0, 0, 0] # boolean array for white pawns first moves
         
@@ -123,6 +124,52 @@ class Pieces:
                 if value[0] == "pawn":
                     screen.blit(self.black_images["pawn"], value[2])
                     continue
+    
+    def get_turn(self):
+        return self.turn
+    
+    def set_turn(self):
+        if self.turn == "white":
+            self.turn = "black"
+        else:
+            self.turn = "white"
+    
+    def is_piece_selected(self):
+        return True if self.selected_piece else False
+    
+    def select_piece(self, mouse_pos):
+        for key, value in self.board.items():
+            x, y = value[2]
+            piece_rect = pygame.Rect(x, y, 100, 100)
+            
+            if piece_rect.collidepoint(mouse_pos):
+                if value[0] != None:
+                    self.selected_piece = key
+                    
+    def deselect_piece(self):
+        self.selected_piece = None
+    
+    def is_turns_piece(self):
+        if self.board[self.selected_piece][1] == self.turn:
+            return True
+        else:
+            return False
+      
+    def move_piece(self, mouse_pos):
+        curr_piece = self.board[self.selected_piece]
+        for key, value in self.board.items():
+            x, y = value[2] 
+            piece_rect = pygame.Rect(x, y, 100, 100)
+            if piece_rect.collidepoint(mouse_pos):
+                print(f'Value: {value[1]}')
+                print(f'Turn: {self.turn}')
+                value[0] = curr_piece[0]
+                value[1] = curr_piece[1]
+                self.board[self.selected_piece][0] = None
+                self.board[self.selected_piece][1] = None
+            
+        self.deselect_piece()
+        self.set_turn()
     
     def has_piece(self, mouse_pos):
         for key, value in self.board.items():

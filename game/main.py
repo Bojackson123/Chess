@@ -58,7 +58,7 @@ def play():
     game_board = Board()
     # print(game_board.tiles)
     pieces = Pieces("black")
-    #print(pieces.board)
+    print(pieces.board)
     # print(pieces.white_threat_map)
     # print(pieces.black_threat_map)
     test_moves = pieces.king_possible_moves((3,0))
@@ -67,7 +67,7 @@ def play():
     while True:
         game_board.draw(screen)
         pieces.draw_pieces(screen)
-        game_board.test_draw(test_moves,screen)
+        #game_board.test_draw(test_moves,screen)
     
     
         for event in pygame.event.get():
@@ -77,7 +77,17 @@ def play():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if event.button == 1 and pieces.has_piece(mouse_pos):
-                    game_board.add_remove_highlight("left", mouse_pos)
+                    game_board.highlight_yellow(mouse_pos)
+                    pieces.select_piece(mouse_pos)
+                    print(pieces.selected_piece)
+                    
+                elif event.button == 1 and pieces.is_piece_selected() and pieces.is_turns_piece():
+                    pieces.move_piece(mouse_pos)
+                    game_board.remove_all_highlights()      
+                else:
+                    game_board.remove_all_highlights()
+                    #pieces.deselect_piece()
+                print(pieces.is_piece_selected())
                 if event.button == 3:
                     game_board.add_remove_highlight("right", mouse_pos)
                     

@@ -7,7 +7,6 @@ class Board():
         self.height = 800
         self.tile_size = 100
         self.tiles = []  # Matrix to hold each tile's rectangle and color
-        self.default_colors = []
         self.piece_chosen = False
         color1 = WHITE
         color2 = GREEN
@@ -25,9 +24,7 @@ class Board():
                     self.tile_size
                 )
                 row_tiles.append({'rect': rect, 'color': color, 'highlight': None})
-                row_colors.append(color)
             self.tiles.append(row_tiles)
-            self.default_colors.append(row_colors)
 
     def draw(self, screen):
         screen.fill(BLACK) 
@@ -71,6 +68,28 @@ class Board():
                             tile["highlight"] = RED
                         else:
                             tile["highlight"] = None
+    
+    def remove_all_highlights(self):
+        for row in self.tiles:
+            for tile in row:
+                tile['highlight'] = None
+                            
+    def highlight_yellow(self, mouse_pos):
+        found = False
+        for row in self.tiles:
+            for tile in row:
+                if tile['rect'].collidepoint(mouse_pos):
+                    if self.piece_chosen:
+                        self.remove_all_highlights()
+                    tile['highlight'] = YELLOW
+                    self.piece_chosen = True
+                    found = True
+                    break
+            if found:
+                return
+
+
+        
             
         
             
