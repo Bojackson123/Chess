@@ -58,15 +58,16 @@ def play():
     game_board = Board()
     # print(game_board.tiles)
     pieces = Pieces("black")
-    print(pieces.board)
+    #print(pieces.board)
     # print(pieces.white_threat_map)
     # print(pieces.black_threat_map)
-    test_moves = pieces.rook_possible_moves("white", (3,3))
+    test_moves = pieces.king_possible_moves((3,0))
     print(test_moves)
     
     while True:
         game_board.draw(screen)
         pieces.draw_pieces(screen)
+        game_board.test_draw(test_moves,screen)
     
     
         for event in pygame.event.get():

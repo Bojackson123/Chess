@@ -42,6 +42,13 @@ class Board():
                     highlight_surface.fill(highlight_color)
                     screen.blit(highlight_surface, tile['rect'].topleft)
     
+    def test_draw(self, coords_list, screen):
+        for coords in coords_list:
+            y, x = coords
+            highlight_surface = pygame.Surface((self.tiles[x][y]['rect'].width, self.tiles[x][y]['rect'].height), pygame.SRCALPHA)
+            highlight_color = RED[:3] + (150,) 
+            highlight_surface.fill(highlight_color)
+            screen.blit(highlight_surface, self.tiles[x][y]['rect'].topleft)
     
     def set_piece_chosen(self):
         if self.piece_chosen == True:

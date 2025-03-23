@@ -180,7 +180,6 @@ class Pieces:
             if self.is_in_bounds(move):
                 inbound_moves.append(move)
         return inbound_moves  
-            
     
     def rook_possible_moves(self, coords):
         x, y = coords
@@ -214,18 +213,89 @@ class Pieces:
         
         return possible_moves        
     
-    def knight_possible_moves(self, color, coords):
-        pass
+    def knight_possible_moves(self, coords):# (2, 5)
+        x, y = coords
+        possible_moves = []
+        
+        possible_moves.append((x - 2, y - 1))
+        possible_moves.append((x - 1, y - 2))
+        
+        possible_moves.append((x + 1, y - 2))
+        possible_moves.append((x + 2, y - 1))
+        
+        possible_moves.append((x + 2, y + 1))
+        possible_moves.append((x + 1, y + 2))
+        
+        possible_moves.append((x - 1, y + 2))
+        possible_moves.append((x - 2, y + 1))
+        
+        inbound_moves = []
+        for move in possible_moves:
+            if self.is_in_bounds(move):
+                inbound_moves.append(move)
+        
+        return inbound_moves
+        
+    def bishop_possible_moves(self, coords):
+        x, y = coords
+        possible_moves = []
+        moves = ["top-left", "top-right", "bot-left", "bot-right"]
+        
+        for move in moves:
+            if move == "top-left":
+                i, j = x - 1, y - 1
+                while i >= 0 and j >= 0:
+                    possible_moves.append((i, j))
+                    i -= 1
+                    j -= 1
+            
+            if move == "top-right":
+                i, j = x + 1, y - 1
+                while i <= 7 and j >= 0:
+                    possible_moves.append((i, j))
+                    i += 1
+                    j -= 1
+            
+            if move == "bot-left":
+                i, j = x - 1, y + 1
+                while i >= 0 and j <= 7:
+                    possible_moves.append((i, j))
+                    i -= 1
+                    j += 1
+            
+            if move == "bot-right":
+                i, j = x + 1, y + 1
+                while i <= 7 and j <= 7:
+                    possible_moves.append((i, j))
+                    i += 1
+                    j += 1
+        
+        return possible_moves
     
-    def bishop_possible_moves(self, color, coords):
-        pass
+    def queen_possible_moves(self, coords):
+        possible_moves = self.bishop_possible_moves(coords) + self.rook_possible_moves(coords)
+        
+        return possible_moves
     
-    def queen_possible_moves(self, color, coords):
-        pass
-    
-    def king_possible_moves(self, color, coords):
-        pass
-    
+    def king_possible_moves(self, coords):
+        x, y = coords
+        possible_moves = []
+        
+        possible_moves.append((x - 1, y - 1))
+        possible_moves.append((x, y - 1))
+        possible_moves.append((x + 1, y - 1))
+        possible_moves.append((x + 1, y))
+        possible_moves.append((x + 1, y + 1))
+        possible_moves.append((x, y + 1))
+        possible_moves.append((x - 1, y + 1))
+        possible_moves.append((x - 1, y))
+
+        inbound_moves = []
+        for move in possible_moves:
+            if self.is_in_bounds(move):
+                inbound_moves.append(move)
+                
+        return inbound_moves
     
                 
         
