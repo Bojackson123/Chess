@@ -228,6 +228,37 @@ class Pieces:
                 inbound_moves.append(move)
         return inbound_moves  
     
+    def pawn_legal_moves(self, coords):
+        if coords is None:
+            return
+        
+        x, y = coords
+        legal_moves = []
+
+        piece, color, _ = self.board[coords]
+        direction = 1 if color == "white" else -1  # White moves up (y+1), black moves down (y-1)
+        start_row = 1 if color == "white" else 6
+        promotion_row = 7 if color == "white" else 0
+
+        # Normal 1-square move forward
+        if (x, y + direction) in self.board and self.board[(x, y + direction)][0] is None:
+            legal_moves.append((x, y + direction))
+
+            # Double move from starting position
+            if y == start_row and (x, y + 2 * direction) in self.board and self.board[(x, y + 2 * direction)][0] is None:
+                legal_moves.append((x, y + 2 * direction))
+
+        # Capture diagonally (left and right)
+        for dx in [-1, 1]:
+            nx, ny = x + dx, y + direction
+            if 0 <= nx < 8 and 0 <= ny < 8:
+                if (nx, ny) in self.board:
+                    target_piece, target_color, _ = self.board[(nx, ny)]
+                    if target_piece is not None and target_color != color:
+                        legal_moves.append((nx, ny))
+
+        return legal_moves
+  
     def rook_possible_moves(self, coords):
         x, y = coords
         possible_moves = []
@@ -260,6 +291,39 @@ class Pieces:
         
         return possible_moves        
     
+    def rook_legal_moves(self, coords):
+        if coords is None:
+            return
+        x, y = coords
+        legal_moves = []
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]  # Right, Left, Down, Up
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+
+            # Keep moving in one direction until blocked or off-board
+            while 0 <= nx < 8 and 0 <= ny < 8:  # Ensure within the 8x8 grid
+                if (nx, ny) in self.board:
+                    piece, color, _ = self.board[(nx, ny)]
+                    
+                    # If the square is empty (None), it's a legal move
+                    if piece is None:
+                        legal_moves.append((nx, ny))
+                    else:
+                        # If the square contains an opponent piece, it's a capture move
+                        if color != self.board[(x, y)][1]:
+                            legal_moves.append((nx, ny))
+                        break  # Stop moving after any piece (friend or enemy)
+                else:
+                    # Just in case any square isn’t in the board dictionary
+                    legal_moves.append((nx, ny))
+
+                # Move further in the current direction
+                nx += dx
+                ny += dy
+
+        return legal_moves
+
     def knight_possible_moves(self, coords):# (2, 5)
         x, y = coords
         possible_moves = []
@@ -282,7 +346,34 @@ class Pieces:
                 inbound_moves.append(move)
         
         return inbound_moves
+    
+    def knight_legal_moves(self, coords):
+        if coords is None:
+            return
         
+        x, y = coords
+        legal_moves = []
+
+        # All possible "L" shape moves for a knight
+        moves = [
+            (2, 1), (2, -1), (-2, 1), (-2, -1),
+            (1, 2), (1, -2), (-1, 2), (-1, -2)
+        ]
+
+        for dx, dy in moves:
+            nx, ny = x + dx, y + dy
+
+            # Ensure the move stays within the 8x8 board
+            if 0 <= nx < 8 and 0 <= ny < 8:
+                if (nx, ny) in self.board:
+                    piece, color, _ = self.board[(nx, ny)]
+
+                    # Either the square is empty or has an opponent piece (capture)
+                    if piece is None or color != self.board[(x, y)][1]:
+                        legal_moves.append((nx, ny))
+
+        return legal_moves
+   
     def bishop_possible_moves(self, coords):
         x, y = coords
         possible_moves = []
@@ -319,10 +410,49 @@ class Pieces:
         
         return possible_moves
     
+    def bishop_legal_moves(self, coords):
+        if coords is None:
+            return
+        x, y = coords
+        legal_moves = []
+        directions = [(1, -1), (-1, -1), (1, 1), (-1, 1)]  # Top-Right, Top-Left, Bot-Right, Bot-Left
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+
+            # Keep moving in one direction until blocked or off-board
+            while 0 <= nx < 8 and 0 <= ny < 8:  # Ensure within the 8x8 grid
+                if (nx, ny) in self.board:
+                    piece, color, _ = self.board[(nx, ny)]
+                    
+                    # If the square is empty (None), it's a legal move
+                    if piece is None:
+                        legal_moves.append((nx, ny))
+                    else:
+                        # If the square contains an opponent piece, it's a capture move
+                        if color != self.board[(x, y)][1]:
+                            legal_moves.append((nx, ny))
+                        break  # Stop moving after any piece (friend or enemy)
+                else:
+                    # Just in case any square isn’t in the board dictionary
+                    legal_moves.append((nx, ny))
+
+                # Move further in the current direction
+                nx += dx
+                ny += dy
+
+        return legal_moves
+    
     def queen_possible_moves(self, coords):
         possible_moves = self.bishop_possible_moves(coords) + self.rook_possible_moves(coords)
         
         return possible_moves
+    
+    def queen_legal_moves(self, coords):
+        if coords is None:
+            return
+        legal_moves = self.bishop_legal_moves(coords) + self.rook_legal_moves(coords)
+        return legal_moves
     
     def king_possible_moves(self, coords):
         x, y = coords
@@ -344,6 +474,33 @@ class Pieces:
                 
         return inbound_moves
     
+    def king_legal_moves(self, coords):
+        if coords is None:
+            return
+        
+        x, y = coords
+        legal_moves = []
+
+        # King moves one square in any direction
+        moves = [
+            (1, 0), (-1, 0), (0, 1), (0, -1),  # Horizontal and vertical
+            (1, 1), (1, -1), (-1, 1), (-1, -1)  # Diagonal directions
+        ]
+
+        for dx, dy in moves:
+            nx, ny = x + dx, y + dy
+
+            # Ensure move stays within the board
+            if 0 <= nx < 8 and 0 <= ny < 8:
+                if (nx, ny) in self.board:
+                    piece, color, _ = self.board[(nx, ny)]
+
+                    # If square is empty or has an opponent's piece (capture)
+                    if piece is None or color != self.board[(x, y)][1]:
+                        legal_moves.append((nx, ny))
+
+        return legal_moves
+
                 
         
     

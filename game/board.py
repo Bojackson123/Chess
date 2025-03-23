@@ -40,6 +40,8 @@ class Board():
                     screen.blit(highlight_surface, tile['rect'].topleft)
     
     def test_draw(self, coords_list, screen):
+        if coords_list is None:
+            return
         for coords in coords_list:
             y, x = coords
             highlight_surface = pygame.Surface((self.tiles[x][y]['rect'].width, self.tiles[x][y]['rect'].height), pygame.SRCALPHA)

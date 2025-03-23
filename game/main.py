@@ -61,13 +61,13 @@ def play():
     print(pieces.board)
     # print(pieces.white_threat_map)
     # print(pieces.black_threat_map)
-    test_moves = pieces.king_possible_moves((3,0))
-    print(test_moves)
+    
     
     while True:
         game_board.draw(screen)
         pieces.draw_pieces(screen)
-        #game_board.test_draw(test_moves,screen)
+        test_moves = pieces.pawn_legal_moves(pieces.selected_piece)
+        game_board.test_draw(test_moves,screen)
     
     
         for event in pygame.event.get():
@@ -81,9 +81,11 @@ def play():
                     pieces.select_piece(mouse_pos)
                     print(pieces.selected_piece)
                     
-                elif event.button == 1 and pieces.is_piece_selected() and pieces.is_turns_piece():
-                    pieces.move_piece(mouse_pos)
-                    game_board.remove_all_highlights()      
+                elif event.button == 1 and pieces.is_piece_selected():
+    
+                    if pieces.is_turns_piece():
+                        pieces.move_piece(mouse_pos)
+                        game_board.remove_all_highlights()      
                 else:
                     game_board.remove_all_highlights()
                     #pieces.deselect_piece()
