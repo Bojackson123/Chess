@@ -236,28 +236,37 @@ class Pieces:
         legal_moves = []
 
         piece, color, _ = self.board[coords]
-        direction = 1 if color == "white" else -1  # White moves up (y+1), black moves down (y-1)
-        start_row = 1 if color == "white" else 6
-        promotion_row = 7 if color == "white" else 0
+        
+        # Determine direction based on self.color (player's perspective)
+        if color == self.color:
+            direction = -1  # Player's pawns move "up" the board
+            start_row = 6
+            promotion_row = 0
+        else:
+            direction = 1  # Opponent's pawns move "down" the board
+            start_row = 1
+            promotion_row = 7
 
         # Normal 1-square move forward
-        if (x, y + direction) in self.board and self.board[(x, y + direction)][0] is None:
-            legal_moves.append((x, y + direction))
+        forward = (x, y + direction)
+        if forward in self.board and self.board[forward][0] is None:
+            legal_moves.append(forward)
 
-            # Double move from starting position
-            if y == start_row and (x, y + 2 * direction) in self.board and self.board[(x, y + 2 * direction)][0] is None:
-                legal_moves.append((x, y + 2 * direction))
+            # Double move from starting row
+            double_forward = (x, y + 2 * direction)
+            if y == start_row and double_forward in self.board and self.board[double_forward][0] is None:
+                legal_moves.append(double_forward)
 
-        # Capture diagonally (left and right)
+        # Diagonal captures (left and right)
         for dx in [-1, 1]:
-            nx, ny = x + dx, y + direction
-            if 0 <= nx < 8 and 0 <= ny < 8:
-                if (nx, ny) in self.board:
-                    target_piece, target_color, _ = self.board[(nx, ny)]
-                    if target_piece is not None and target_color != color:
-                        legal_moves.append((nx, ny))
+            capture_pos = (x + dx, y + direction)
+            if capture_pos in self.board:
+                target_piece, target_color, _ = self.board[capture_pos]
+                if target_piece is not None and target_color != color:
+                    legal_moves.append(capture_pos)
 
         return legal_moves
+
   
     def rook_possible_moves(self, coords):
         x, y = coords
@@ -297,6 +306,10 @@ class Pieces:
         x, y = coords
         legal_moves = []
         directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]  # Right, Left, Down, Up
+        
+        # Flip directions if White starts on the top
+        if self.color == 'white':
+            directions = [(-dx, -dy) for dx, dy in directions]
 
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
@@ -359,6 +372,11 @@ class Pieces:
             (2, 1), (2, -1), (-2, 1), (-2, -1),
             (1, 2), (1, -2), (-1, 2), (-1, -2)
         ]
+        
+        # Flip directions if White starts on the top
+        if self.color == 'white':
+            moves = [(-dx, -dy) for dx, dy in moves]
+
 
         for dx, dy in moves:
             nx, ny = x + dx, y + dy
@@ -416,6 +434,11 @@ class Pieces:
         x, y = coords
         legal_moves = []
         directions = [(1, -1), (-1, -1), (1, 1), (-1, 1)]  # Top-Right, Top-Left, Bot-Right, Bot-Left
+        
+        # Flip directions if White starts on the top
+        if self.color == 'white':
+            directions = [(-dx, -dy) for dx, dy in directions]
+
 
         for dx, dy in directions:
             nx, ny = x + dx, y + dy
@@ -486,6 +509,11 @@ class Pieces:
             (1, 0), (-1, 0), (0, 1), (0, -1),  # Horizontal and vertical
             (1, 1), (1, -1), (-1, 1), (-1, -1)  # Diagonal directions
         ]
+        
+        # Flip directions if White starts on the top
+        if self.color == 'white':
+            moves = [(-dx, -dy) for dx, dy in moves]
+
 
         for dx, dy in moves:
             nx, ny = x + dx, y + dy
@@ -501,6 +529,78 @@ class Pieces:
 
         return legal_moves
 
-                
+    def is_legal_move(self, mouse_pos):
+        piece_coords = self.selected_piece
+        piece_type = self.board[self.selected_piece][0]
+        move_coords = None
+        
+        for key, value in self.board.items():
+            piece_x, piece_y = value[2]
+            piece_rect = pygame.Rect(piece_x, piece_y, 100, 100)
+            
+            if piece_rect.collidepoint(mouse_pos):
+                move_coords = key
+        
+        if piece_type == "rook":
+            if move_coords in self.rook_legal_moves(piece_coords):
+                return True
+            else:
+                return False
+        
+        if piece_type == "bishop":
+            if move_coords in self.bishop_legal_moves(piece_coords):
+                return True
+            else:
+                return False
+        
+        if piece_type == "knight":
+            if move_coords in self.knight_legal_moves(piece_coords):
+                return True
+            else:
+                return False
+        
+        if piece_type == "queen":
+            if move_coords in self.queen_legal_moves(piece_coords):
+                return True
+            else:
+                return False
+        
+        if piece_type == "king":
+            if move_coords in self.king_legal_moves(piece_coords):
+                return True
+            else:
+                return False
+        
+        if piece_type == "pawn":
+            if move_coords in self.pawn_legal_moves(piece_coords):
+                return True
+            else:
+                return False
+    
+    def legal_moves(self, coords):
+        if coords is None:
+            return []
+        piece_coords = self.selected_piece
+        piece_type = self.board[self.selected_piece][0]
+        
+        if piece_type == "rook":
+            return self.rook_legal_moves(piece_coords)
+        
+        if piece_type == "bishop":
+            return self.bishop_legal_moves(piece_coords)
+        
+        if piece_type == "knight":
+            return self.knight_legal_moves(piece_coords)
+        
+        if piece_type == "queen":
+            return self.queen_legal_moves(piece_coords)
+        
+        if piece_type == "king":
+            return self.king_legal_moves(piece_coords)
+        
+        if piece_type == "pawn":
+            return self.pawn_legal_moves(piece_coords)
+            
+                        
         
     

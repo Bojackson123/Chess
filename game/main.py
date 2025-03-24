@@ -57,7 +57,7 @@ def mainMenu():
 def play():
     game_board = Board()
     # print(game_board.tiles)
-    pieces = Pieces("black")
+    pieces = Pieces("white")
     print(pieces.board)
     # print(pieces.white_threat_map)
     # print(pieces.black_threat_map)
@@ -66,7 +66,7 @@ def play():
     while True:
         game_board.draw(screen)
         pieces.draw_pieces(screen)
-        test_moves = pieces.pawn_legal_moves(pieces.selected_piece)
+        test_moves = pieces.legal_moves(pieces.selected_piece)
         game_board.test_draw(test_moves,screen)
     
     
@@ -75,21 +75,27 @@ def play():
                 pygame.QUIT()
             
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if event.button == 1 and pieces.has_piece(mouse_pos):
-                    game_board.highlight_yellow(mouse_pos)
-                    pieces.select_piece(mouse_pos)
-                    print(pieces.selected_piece)
+                if event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
                     
-                elif event.button == 1 and pieces.is_piece_selected():
-    
-                    if pieces.is_turns_piece():
-                        pieces.move_piece(mouse_pos)
-                        game_board.remove_all_highlights()      
-                else:
+                    # First: Select a new piece if clicked on one
+                    if pieces.has_piece(mouse_pos):
+                        game_board.highlight_yellow(mouse_pos)
+                        pieces.select_piece(mouse_pos)
+                        print(pieces.selected_piece)
+
+                    # Second: Handle moving a selected piece
+                    elif pieces.is_piece_selected():
+                        if pieces.is_turns_piece() and pieces.is_legal_move(mouse_pos):
+                            pieces.move_piece(mouse_pos)
+                        # If the move is invalid or on an empty tile, deselect
+                        else:
+                            pieces.deselect_piece()
+
+                    # Last: Clean up highlights
                     game_board.remove_all_highlights()
-                    #pieces.deselect_piece()
-                print(pieces.is_piece_selected())
+                    print(pieces.is_piece_selected())
+
                 if event.button == 3:
                     game_board.add_remove_highlight("right", mouse_pos)
                     

@@ -14,7 +14,6 @@ class Board():
         # Populate the matrix with rectangles and colors
         for row in range(0, self.height // self.tile_size):
             row_tiles = []
-            row_colors = []
             for col in range(0, self.width // self.tile_size):
                 color = color1 if (row + col) % 2 == 0 else color2
                 rect = pygame.Rect(
@@ -44,10 +43,17 @@ class Board():
             return
         for coords in coords_list:
             y, x = coords
-            highlight_surface = pygame.Surface((self.tiles[x][y]['rect'].width, self.tiles[x][y]['rect'].height), pygame.SRCALPHA)
-            highlight_color = RED[:3] + (150,) 
-            highlight_surface.fill(highlight_color)
-            screen.blit(highlight_surface, self.tiles[x][y]['rect'].topleft)
+            tile_rect = self.tiles[x][y]['rect']
+            center = tile_rect.center
+            radius = min(tile_rect.width, tile_rect.height) // 6
+
+            # Create a transparent surface for the circle
+            highlight_surface = pygame.Surface((tile_rect.width, tile_rect.height), pygame.SRCALPHA)
+            highlight_color = (0, 0, 0, 50)  # Semi-transparent dark circle
+            pygame.draw.circle(highlight_surface, highlight_color, (tile_rect.width // 2, tile_rect.height // 2), radius)
+
+            screen.blit(highlight_surface, tile_rect.topleft)
+
     
     def set_piece_chosen(self):
         if self.piece_chosen == True:
