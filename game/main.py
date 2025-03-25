@@ -57,7 +57,7 @@ def mainMenu():
 def play():
     game_board = Board()
     # print(game_board.tiles)
-    pieces = Pieces("white")
+    pieces = Pieces("black")
     print(pieces.board)
     # print(pieces.white_threat_map)
     # print(pieces.black_threat_map)
@@ -66,38 +66,74 @@ def play():
     while True:
         game_board.draw(screen)
         pieces.draw_pieces(screen)
-        test_moves = pieces.legal_moves(pieces.selected_piece)
-        game_board.test_draw(test_moves,screen)
-    
-    
+        legal_moves = pieces.legal_moves(pieces.selected_piece)
+        capture_moves = pieces.capture_moves(pieces.selected_piece)
+        filtered_legal_moves = [move for move in legal_moves if move not in capture_moves]
+        game_board.legal_draw(filtered_legal_moves, screen)
+        game_board.capture_draw(capture_moves, screen)
+        
+        pieces.generate_threat_map("white")
+        test_list = pieces.convert_threat_map("white")
+        game_board.test_draw(test_list, screen)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.QUIT()
-            
+                pygame.quit()
+                exit()
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
-                    
-                    # First: Select a new piece if clicked on one
-                    if pieces.has_piece(mouse_pos):
-                        game_board.highlight_yellow(mouse_pos)
-                        pieces.select_piece(mouse_pos)
-                        print(pieces.selected_piece)
 
-                    # Second: Handle moving a selected piece
-                    elif pieces.is_piece_selected():
-                        if pieces.is_turns_piece() and pieces.is_legal_move(mouse_pos):
+                    # Handle clicking when a piece is selected
+                    if pieces.is_piece_selected():
+                        selected_piece_coords = pieces.get_piece_coords(mouse_pos)
+
+                        # Capture logic: Clicked on an opponent's piece
+                        if pieces.has_piece(mouse_pos) and pieces.board[selected_piece_coords][1] != pieces.turn:
+                            if pieces.is_legal_move(mouse_pos):
+                                pieces.move_piece(mouse_pos)
+                                game_board.remove_all_highlights()
+                                pieces.deselect_piece()
+
+                        # Switching piece logic: Clicked on another valid piece of the same color
+                        elif pieces.has_piece(mouse_pos) and pieces.board[selected_piece_coords][1] == pieces.turn:
+                            pieces.deselect_piece()
+                            game_board.highlight_yellow(mouse_pos)
+                            pieces.select_piece(mouse_pos)
+                            print(f"Switched to new piece: {pieces.selected_piece}")
+
+                        # Regular move logic: Clicked an empty square or valid move tile
+                        elif pieces.is_legal_move(mouse_pos):
                             pieces.move_piece(mouse_pos)
-                        # If the move is invalid or on an empty tile, deselect
-                        else:
+                            game_board.remove_all_highlights()
                             pieces.deselect_piece()
 
-                    # Last: Clean up highlights
-                    game_board.remove_all_highlights()
+                        # If it's an invalid click, just deselect
+                        else:
+                            game_board.remove_all_highlights()
+                            pieces.deselect_piece()
+
+                    # No piece selected yet: Handle selecting a new piece
+                    elif pieces.has_piece(mouse_pos):
+                        selected_piece_coords = pieces.get_piece_coords(mouse_pos)
+                        if pieces.board[selected_piece_coords][1] == pieces.turn:
+                            game_board.highlight_yellow(mouse_pos)
+                            pieces.select_piece(mouse_pos)
+                            print(f"New selected piece: {pieces.selected_piece}")
+                        else:
+                            print("Not your piece!")
+
+                    # Clean up highlights
+                    
                     print(pieces.is_piece_selected())
 
-                if event.button == 3:
-                    game_board.add_remove_highlight("right", mouse_pos)
+
+
+
+
+
+
                     
                     
         pygame.display.flip()

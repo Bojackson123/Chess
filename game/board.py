@@ -38,7 +38,7 @@ class Board():
                     highlight_surface.fill(highlight_color)
                     screen.blit(highlight_surface, tile['rect'].topleft)
     
-    def test_draw(self, coords_list, screen):
+    def legal_draw(self, coords_list, screen):
         if coords_list is None:
             return
         for coords in coords_list:
@@ -53,7 +53,43 @@ class Board():
             pygame.draw.circle(highlight_surface, highlight_color, (tile_rect.width // 2, tile_rect.height // 2), radius)
 
             screen.blit(highlight_surface, tile_rect.topleft)
+            
+    def capture_draw(self, coords_list, screen):
+        if coords_list is None:
+            return
+        for coords in coords_list:
+            y, x = coords
+            tile_rect = self.tiles[x][y]['rect']
+            center = tile_rect.center
+            outer_radius = min(tile_rect.width, tile_rect.height) // 2
+            ring_thickness = 8  # Thickness of the ring
 
+            # Create a transparent surface for the ring
+            ring_surface = pygame.Surface((tile_rect.width, tile_rect.height), pygame.SRCALPHA)
+
+            # Semi-transparent dark gray color
+            ring_color = (0, 0, 0, 50)
+
+            # Draw the outer circle for the ring
+            pygame.draw.circle(ring_surface, ring_color, (tile_rect.width // 2, tile_rect.height // 2), outer_radius, ring_thickness)
+
+            # Blit the ring onto the screen
+            screen.blit(ring_surface, tile_rect.topleft)
+
+    def test_draw(self, coords_list, screen):
+        if coords_list is None:
+            return
+        for coords in coords_list:
+            y, x = coords
+            tile_rect = self.tiles[x][y]['rect']
+            
+            # Create a transparent surface for the red highlight
+            highlight_surface = pygame.Surface((tile_rect.width, tile_rect.height), pygame.SRCALPHA)
+            highlight_color = (255, 0, 0, 100)  # Semi-transparent red
+            highlight_surface.fill(highlight_color)
+            
+            # Blit the transparent red surface onto the screen at the tile's position
+            screen.blit(highlight_surface, tile_rect.topleft)
     
     def set_piece_chosen(self):
         if self.piece_chosen == True:
